@@ -1,27 +1,30 @@
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { ThemeProvider } from "react-bootstrap";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { DATA_CONTACT, DATA_GROUP_CONTACT } from "src/__data__";
 import { Layout } from "src/components/Layout";
+import { contactStore } from "src/mobx/contact";
+import { favoriteContactStore } from "src/mobx/favoriteContact";
 import { ContactListPage, ContactPage, FavoriteListPage, GroupListPage, GroupPage } from "src/pages";
-import {
-  setContactActionCreator,
-  setFavoriteContactActionCreator,
-  setGroupContactActionCreator,
-} from "src/store/actions";
-import { useAppDispatch } from "src/store/redux";
 import "./MainApp.scss";
+import { groupContactStore } from "src/mobx/groupContact";
 
-export const MainApp = () => {
-  const dispatch = useAppDispatch();
-  const DATA_FAVORITE_CONTACT = [DATA_CONTACT[0].id, DATA_CONTACT[1].id, DATA_CONTACT[2].id, DATA_CONTACT[3].id];
+export const MainApp = observer(() => {
+  const contacts = contactStore.contact;
 
   useEffect(() => {
-    dispatch(setGroupContactActionCreator(DATA_GROUP_CONTACT));
-    dispatch(setContactActionCreator(DATA_CONTACT));
-    dispatch(setFavoriteContactActionCreator(DATA_FAVORITE_CONTACT));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    contactStore.get();
+    groupContactStore.get();
   }, []);
+
+  useEffect(() => {
+    if (contacts && contacts?.length > 4) {
+      const DATA_CONTACT = contacts;
+      const DATA_FAVORITE_CONTACT = [DATA_CONTACT[0].id, DATA_CONTACT[1].id, DATA_CONTACT[2].id, DATA_CONTACT[3].id];
+      favoriteContactStore.set(DATA_FAVORITE_CONTACT);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contacts]);
 
   return (
     <ThemeProvider breakpoints={["xxxl", "xxl", "xl", "lg", "md", "sm", "xs", "xxs"]} minBreakpoint="xxs">
@@ -43,4 +46,4 @@ export const MainApp = () => {
       </BrowserRouter>
     </ThemeProvider>
   );
-};
+});
